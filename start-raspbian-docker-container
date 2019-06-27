@@ -1,0 +1,10 @@
+#!/bin/sh
+set -e
+
+IMAGENAME=raspbian:1
+CUTEARM_DIR=$(realpath $(dirname $0))
+
+docker run -d --rm \
+    -p 2222:22 \
+    --volume=$CUTEARM_DIR:/home/worker/workspace \
+    -t -i $IMAGENAME

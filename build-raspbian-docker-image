@@ -1,0 +1,89 @@
+#!/bin/bash
+set -ex
+
+PROGNAME=$(basename $0)
+ORIGINDIR=$PWD
+WORKDIR=~/tmp/build-raspbian-docker-image
+
+usage() {
+    if [ "$*" != "" ] ; then
+        echo "Error: $*"
+    fi
+
+    cat << EOF
+Usage:  $PROGNAME <archive_url> <docker_img_prefix>
+        $PROGNAME https://downloads.raspberrypi.org/raspbian_lite/images/raspbian_lite-2018-11-15/2018-11-13-raspbian-stretch-lite.zip hasboeuf/raspbian
+
+Docker container for raspbian image:
+- install qemu dependencies on host
+- download raspbian img
+- mount the img
+- copy qemu-arm-static in the img be able to interpret arm elf on x86
+- create the docker image and test it
+
+Options:
+  -h, --help          display this usage message and exit
+EOF
+
+    exit 1
+}
+
+install_qemu() {
+    echo Install qemu
+    sudo apt-get install -y qemu qemu-user-static binfmt-support
+}
+
+download_img() {
+    echo Download raspbian
+    wget --trust-server-names $archive_url
+    wget --trust-server-names $archive_url.sha1
+    filename=$(ls *.zip)
+    sha1sum --check $filename.sha1
+    unzip *.zip
+}
+
+create_image() {
+    echo Mount img
+    img_name=$(basename *.img .img)
+    offset=$(fdisk --list $img_name.img | grep $img_name.img2 --line-buffered | awk '{print $2}')
+    mkdir root
+    sudo  mount -o loop,offset=$(($offset*512)) $img_name.img root
+    sudo cp /usr/bin/qemu-arm-static root/usr/bin
+
+    echo Create image
+    cd root
+    sudo tar -c . | sudo docker import - $docker_img_prefix:$img_name
+    cd ..
+    sudo umount root
+
+    echo Test image
+    if docker run -ti --rm $docker_img_prefix:$img_name /bin/bash -c 'uname -a' | grep armv7l; then echo OK; else echo FAIL; fi
+}
+
+archive_url=""
+docker_img_prefix=""
+
+if [ $# -eq 2 ] ; then
+    archive_url=$1
+    docker_img_prefix=$2
+elif [[ $# -eq 1 ]] ; then
+    case "$1" in
+    -h|--help)
+        usage
+        ;;
+    -*)
+        usage "Unknown option '$1'"
+        ;;
+    esac
+else
+    usage "Unknown command"
+fi
+
+sudo echo Info: Need root access to mount the image to extract the content
+install_qemu
+mkdir -p $WORKDIR
+cd $WORKDIR
+download_img
+create_image
+cd $ORIGINDIR
+echo "You can now trash $WORKDIR"
