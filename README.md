@@ -70,6 +70,17 @@ QMAKE_LIBDIR_OPENVG=/opt/vc/lib QMAKE_INCDIR_OPENVG="/opt/vc/include /opt/vc/inc
 -DEGLFS_DEVICE_INTEGRATION=eglfs_brcm
 
 make
+make install
 ```
 
 This takes around 10h to compile Qt on an average machine.
+
+## Test
+
+```bash
+mkdir qt-sample-app-build
+cd qt-sample-app-build
+../Qt5.12.0/bin/qmake -recursive ../qt-sample-app/qt-sample-app.pro
+make
+./qt-sample-app
+```
