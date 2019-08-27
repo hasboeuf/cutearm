@@ -1,0 +1,5 @@
+# Qt source and build dirs
+Qt*/
+qt-everywhere*
+*build/
+md5sums.txt

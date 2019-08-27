@@ -1,14 +1,15 @@
 ## cutearm
 
 To compile Qt for Raspberry, there are generally two ways:
-1/ compile on device
-2/ use cross-compilation
 
-First solution might be slow: have you ever tried to compile Qt on Raspberry 1? It takes more than 24 hours and you're not really satisfied when compilation breaks 1 hour after you started it while you're in your bed dreaming to get those .so files.
+1. compile on device
+2. use cross-compilation
+
+First solution might be slow: have you ever tried to compile Qt on Raspberry 1? It takes more than 24 hours and you're not really satisfied when compilation breaks 1 hour after you started it while you're in your bed dreaming to get those `.so` files.
 
 Second solution works well but is not easy to setup and maintained.
 
-Here is a third solution which takes advantage of docker ARM images in order to work directly on raspbian like on your Raspberry but within a container.
+Here is a third solution which takes advantage of docker ARM images in order to work directly on Raspbian like on your Raspberry but within a container.
 
 ## Overall steps
 
